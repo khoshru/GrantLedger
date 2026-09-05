@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          version: "0.12.10"
+          enable-cache: true
+      - name: Install Python
+        run: uv python install 3.14
+      - name: Install dependencies
+        run: uv sync --locked --all-groups
+      - name: Run pre-commit
+        run: uv run pre-commit run --all-files
+      - name: Run Django checks
+        run: uv run python manage.py check
+      - name: Run tests
+        run: uv run pytest --cov
