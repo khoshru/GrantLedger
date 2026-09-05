@@ -1,6 +1,6 @@
 # GrantLedger
 
-Grant management and financial accountability platform built with Django.
+GrantLedger is a secure Django application for managing temporary access requests, approvals, and access grants.
 
 ## Requirements
 
