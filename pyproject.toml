@@ -9,6 +9,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "bandit[toml]>=1.9.4,<2",
     "django-stubs[compatible-mypy]>=6.1,<6.2",
     "mypy>=2.3.1,<2.4",
     "pre-commit>=4.6.2,<5",
@@ -35,14 +36,10 @@ select = [
     "F",   # Pyflakes
     "I",   # import sorting
     "PIE", # flake8-pie
-    "S",   # flake8-bandit
     "SIM", # flake8-simplify
     "UP",  # pyupgrade
 ]
 ignore = ["E501"]
-
-[tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["S101"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -54,6 +51,9 @@ exclude = ["(^|/)migrations/", '^\.venv/']
 [tool.django-stubs]
 django_settings_module = "config.settings"
 
+[tool.bandit]
+exclude_dirs = [".venv", "migrations", "tests"]
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
 addopts = "-ra --strict-config --strict-markers"
@@ -61,12 +61,18 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["config"]
+relative_files = true
+source = ["."]
 omit = [
+    ".venv/*",
+    "*/migrations/*",
     "config/asgi.py",
     "config/wsgi.py",
+    "manage.py",
+    "tests/*",
 ]
 
 [tool.coverage.report]
+fail_under = 85
 show_missing = true
 skip_covered = true
