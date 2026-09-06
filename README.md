@@ -17,14 +17,6 @@ UV_MALWARE_CHECK=1 uv sync --locked --all-groups --preview-features malware-chec
 uv run pre-commit install
 ```
 
-Set the development environment for your current shell:
-
-```bash
-export DJANGO_SECRET_KEY="$(uv run python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')"
-export DJANGO_DEBUG=true
-export DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
-```
-
 Create the database and start the server:
 
 ```bash
@@ -52,5 +44,6 @@ Create a focused branch, add tests with your change, run the quality checks,
 and open a pull request against `main`. CI must pass before the change is
 merged.
 
-Never commit secrets or local environment files. Production must provide its
-own `DJANGO_SECRET_KEY` and allowed hosts.
+Local commands use `config.settings.local` automatically. Deployments use
+`config.settings.production` and must provide `DJANGO_SECRET_KEY` and the
+comma-separated `DJANGO_ALLOWED_HOSTS` through their environment.

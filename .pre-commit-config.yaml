@@ -33,6 +33,7 @@ repos:
         additional_dependencies:
           - Django==6.1.1
           - django-stubs[compatible-mypy]==6.1.0
+          - pytest==9.1.1
         args: [--config-file=pyproject.toml]
         exclude: "(^|/)migrations/"
 
