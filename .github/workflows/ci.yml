@@ -23,6 +23,8 @@ jobs:
         run: uv python install 3.14
       - name: Install dependencies
         run: uv sync --locked --all-groups --preview-features malware-check
+      - name: Audit dependencies
+        run: uv audit --locked --preview-features audit-command
       - name: Run pre-commit
         run: uv run pre-commit run --all-files
       - name: Run Django checks

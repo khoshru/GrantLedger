@@ -44,8 +44,8 @@ uv run python manage.py check
 uv run pytest --cov
 ```
 
-Pre-commit runs formatting, linting, type checking, Bandit, and dependency
-auditing automatically on each commit. Tests enforce a minimum of 85% branch
+Pre-commit runs formatting, linting, type checking, and Bandit automatically on
+each commit. CI audits dependencies and enforces a minimum of 85% branch
 coverage.
 
 ## Contributing
