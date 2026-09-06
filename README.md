@@ -4,7 +4,7 @@ GrantLedger is a secure Django application for managing temporary access request
 
 ## Requirements
 
-- Python 3.12 or newer
+- Python 3.14 or newer
 - [uv](https://docs.astral.sh/uv/) 0.12.10 or newer
 
 ## Local Setup

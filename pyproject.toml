@@ -2,7 +2,7 @@
 name = "grant-ledger"
 version = "0.1.0"
 description = "Grant management and financial accountability platform"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "Django>=6.1.1,<6.2",
 ]
@@ -24,7 +24,7 @@ package = false
 
 [tool.ruff]
 line-length = 88
-target-version = "py312"
+target-version = "py314"
 extend-exclude = ["*/migrations/*.py"]
 
 [tool.ruff.lint]
@@ -42,7 +42,7 @@ select = [
 ignore = ["E501"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 plugins = ["mypy_django_plugin.main"]
 strict = true
 warn_unreachable = true
