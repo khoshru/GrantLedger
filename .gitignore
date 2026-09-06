@@ -16,6 +16,7 @@ htmlcov/
 # Django
 db.sqlite3
 db.sqlite3-journal
+config/settings/local.py
 media/
 staticfiles/
 

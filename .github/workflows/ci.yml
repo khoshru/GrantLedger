@@ -26,6 +26,6 @@ jobs:
       - name: Run pre-commit
         run: uv run pre-commit run --all-files
       - name: Run Django checks
-        run: uv run python manage.py check
+        run: uv run python manage.py check --settings=config.settings.test
       - name: Run tests
         run: uv run pytest --cov

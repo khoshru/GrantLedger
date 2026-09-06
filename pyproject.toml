@@ -49,13 +49,13 @@ warn_unreachable = true
 exclude = ["(^|/)migrations/", '^\.venv/']
 
 [tool.django-stubs]
-django_settings_module = "config.settings.local"
+django_settings_module = "config.settings.test"
 
 [tool.bandit]
 exclude_dirs = [".venv", "migrations", "tests"]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "config.settings.local"
+DJANGO_SETTINGS_MODULE = "config.settings.test"
 addopts = "-ra --strict-config --strict-markers"
 testpaths = ["tests"]
 
@@ -67,6 +67,7 @@ omit = [
     ".venv/*",
     "*/migrations/*",
     "config/asgi.py",
+    "config/settings/local*.py",
     "config/wsgi.py",
     "manage.py",
     "tests/*",

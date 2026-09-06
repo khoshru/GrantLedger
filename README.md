@@ -17,6 +17,16 @@ UV_MALWARE_CHECK=1 uv sync --locked --all-groups --preview-features malware-chec
 uv run pre-commit install
 ```
 
+Create your ignored local settings file from the tracked example:
+
+```bash
+cp config/settings/local_example.py config/settings/local.py
+```
+
+Customize `local.py` when needed for your machine. It inherits the shared
+settings from `base.py` and is ignored by Git, so local values cannot be
+committed accidentally.
+
 Create the database and start the server:
 
 ```bash
@@ -44,6 +54,7 @@ Create a focused branch, add tests with your change, run the quality checks,
 and open a pull request against `main`. CI must pass before the change is
 merged.
 
-Local commands use `config.settings.local` automatically. Deployments use
-`config.settings.production` and must provide `DJANGO_SECRET_KEY` and the
-comma-separated `DJANGO_ALLOWED_HOSTS` through their environment.
+`manage.py` uses your `local.py` automatically. Tests and CI use the committed
+`test.py`, while deployments use `production.py` and must provide
+`DJANGO_SECRET_KEY` and comma-separated `DJANGO_ALLOWED_HOSTS` environment
+variables.
