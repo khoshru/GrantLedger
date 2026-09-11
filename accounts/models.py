@@ -50,6 +50,13 @@ class UserManager(BaseUserManager["User"]):
 class LowercaseEmailFields(models.EmailField):  # type: ignore[type-arg]
     """EmailField that normalizes stored values to lowercase."""
 
+    def get_prep_value(self, value: str | None) -> str | None:
+        """Lowercase the value before it reaches the database."""
+        value = super().get_prep_value(value)
+        if value is not None:
+            return value.lower()
+        return value
+
     def clean(
         self,
         value: str | None,
@@ -59,7 +66,6 @@ class LowercaseEmailFields(models.EmailField):  # type: ignore[type-arg]
         value = super().clean(value, model_instance)
         try:
             return value.lower()
-
         except AttributeError:
             raise ValidationError("Enter a valid email address.") from None
 
