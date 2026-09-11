@@ -67,6 +67,18 @@ class TestEmailUniqueness:
         with pytest.raises(IntegrityError), transaction.atomic():
             User.objects.create_user(email="USER@EXAMPLE.COM", password="other-pw-9")
 
+    def test_direct_create_normalizes_email(self) -> None:
+        """Verify objects.create stores the email lowercased in the database."""
+        user = User.objects.create(email="DIRECT@EXAMPLE.COM")
+        stored = User.objects.get(pk=user.pk)
+        assert stored.email == "direct@example.com"
+
+    def test_bulk_create_normalizes_email(self) -> None:
+        """Verify bulk_create lowercases emails (path that skips clean())."""
+        User.objects.bulk_create([User(email="BULK@EXAMPLE.COM")])
+        user = User.objects.get(email="bulk@example.com")
+        assert user.email == "bulk@example.com"
+
 
 @pytest.mark.django_db
 class TestProfileFields:
