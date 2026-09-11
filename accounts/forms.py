@@ -9,7 +9,7 @@ class UserCreationForm(DjangoUserCreationForm):  # type: ignore[type-arg]
 
     class Meta(DjangoUserCreationForm.Meta):
         model = User
-        fields = ("email", "first_name", "last_name", "password")
+        fields = ("email", "first_name", "last_name")
 
 
 class UserChangeForm(DjangoUserChangeForm):  # type: ignore[type-arg]
