@@ -36,6 +36,13 @@ uv run python manage.py runserver
 
 The application is available at <http://127.0.0.1:8000/>.
 
+## Custom User Model
+
+The project uses a custom `accounts.User` model with `email` as the login
+identifier. If your local SQLite database was created before this change
+(that is, it still contains `auth.User`), it cannot be migrated in place:
+delete `db.sqlite3` and run `migrate` again.
+
 ## Quality Checks
 
 ```bash
