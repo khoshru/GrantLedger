@@ -2,8 +2,8 @@ from typing import Any
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.functions import Lower
 
 
 class UserManager(BaseUserManager["User"]):
@@ -46,6 +46,10 @@ class UserManager(BaseUserManager["User"]):
             raise ValueError("Superuser must have is_superuser=True.")
         return self._create_user(email, password, **extra_fields)
 
+    def get_by_natural_key(self, email: str | None) -> User:
+        """Allow case-insensitive lookup of users by email."""
+        return self.get(**{f"{self.model.USERNAME_FIELD}__iexact": email})
+
 
 class LowercaseEmailFields(models.EmailField):  # type: ignore[type-arg]
     """EmailField that normalizes stored values to lowercase."""
@@ -64,10 +68,7 @@ class LowercaseEmailFields(models.EmailField):  # type: ignore[type-arg]
     ) -> str | None:
         """Lowercase the value before running the parent validation."""
         value = super().clean(value, model_instance)
-        try:
-            return value.lower()
-        except AttributeError:
-            raise ValidationError("Enter a valid email address.") from None
+        return value.lower() if value else value
 
 
 class User(AbstractUser):
@@ -82,6 +83,16 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = UserManager()  # type: ignore[assignment,misc]
+
+    class Meta(AbstractUser.Meta):
+        """Model metadata with a database-level lowercase email guard."""
+
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(email=Lower("email")),
+                name="%(app_label)s_%(class)s_email_lowercase",
+            ),
+        ]
 
     def __str__(self) -> str:
         """Return the email address as the user's representation."""

@@ -1,6 +1,6 @@
 import pytest
-from django.contrib.auth import get_user_model
-from django.db import IntegrityError, transaction
+from django.contrib.auth import authenticate, get_user_model
+from django.db import IntegrityError, connection, transaction
 from django.test import Client
 
 User = get_user_model()
@@ -78,6 +78,46 @@ class TestEmailUniqueness:
         User.objects.bulk_create([User(email="BULK@EXAMPLE.COM")])
         user = User.objects.get(email="bulk@example.com")
         assert user.email == "bulk@example.com"
+
+    def test_constraint_rejects_uppercase_email(self) -> None:
+        """Verify the database constraint rejects uppercase emails via raw SQL."""
+        User.objects.create_user(email="user@example.com", password="s3cret-pw!")
+        with (
+            transaction.atomic(),
+            connection.cursor() as cursor,
+            pytest.raises(IntegrityError),
+        ):
+            cursor.execute(
+                f"UPDATE {User._meta.db_table} SET email = %s",
+                ["USER@EXAMPLE.COM"],
+            )
+
+
+@pytest.mark.django_db
+class TestCaseInsensitiveLogin:
+    def test_get_by_natural_key_is_case_insensitive(self) -> None:
+        """Verify users can be looked up by email regardless of case."""
+        User.objects.create_user(email="user@example.com", password="s3cret-pw!")
+        user = User.objects.get_by_natural_key("USER@EXAMPLE.COM")
+        assert user.email == "user@example.com"
+
+    def test_authenticate_with_mixed_case_email(self) -> None:
+        """Verify authenticate() succeeds with different email casing."""
+        User.objects.create_user(email="user@example.com", password="s3cret-pw!")
+        user = authenticate(username="User@Example.Com", password="s3cret-pw!")
+        assert user is not None
+        assert user.email == "user@example.com"
+
+    def test_authenticate_with_wrong_password_fails(self) -> None:
+        """Verify mixed-case login still requires the correct password."""
+        User.objects.create_user(email="user@example.com", password="s3cret-pw!")
+        user = authenticate(username="User@Example.Com", password="wrong-pw-12")
+        assert user is None
+
+    def test_authenticate_with_unknown_email_fails(self) -> None:
+        """Verify authenticate() returns None for unknown mixed-case emails."""
+        user = authenticate(username="Nobody@Example.Com", password="s3cret-pw")
+        assert user is None
 
 
 @pytest.mark.django_db
