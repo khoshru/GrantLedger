@@ -1,8 +1,11 @@
+from unittest import mock
+
 import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import Client
 from django.utils import timezone
+from pytest_django.fixtures import DjangoAssertNumQueries
 
 from organizations.models import Organization
 
@@ -70,3 +73,22 @@ class TestOrganizationCreation:
         response = admin_client.get("/admin/organizations/organization/")
         assert response.status_code == 200
         assert "Visible Crop" in response.content.decode()
+
+    def test_generated_slug_retries_when_lost_race(self) -> None:
+        Organization.objects.create(name="Acme Crop", slug="acme-crop")
+        with mock.patch.object(
+            Organization,
+            "_generate_unique_slug",
+            side_effect=["acme-crop", "acme-crop-2"],
+        ):
+            org = Organization.objects.create(name="Acme Crop")
+        assert org.slug == "acme-crop-2"
+
+    def test_generate_slug_single_query(
+        self, django_assert_num_queries: DjangoAssertNumQueries
+    ) -> None:
+        Organization.objects.create(name="Acme Crop", slug="acme-crop")
+        Organization.objects.create(name="Acme Crop", slug="acme-crop-2")
+        org = Organization(name="Acme Crop")
+        with django_assert_num_queries(1):
+            org._generate_unique_slug()
