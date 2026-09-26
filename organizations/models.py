@@ -15,8 +15,9 @@ class Organization(models.Model):
 
     Slug policy (the only supported workflow):
 
-    1. If a slug is supplied at creation, it is used exactly as given
-       (validated for format) and becomes immutable.
+    1. If a slug is supplied at creation, it is used exactly as given and
+       becomes immutable. Slug *format* is validated by ``full_clean()`` /
+       admin forms only, and is intended to be validated from there.
     2. Otherwise, a slug is generated once from the name with
        ``django.utils.text.slugify``. When the generated slug is already
        taken, a numeric suffix (``-2``, ``-3``, ...) is appended until it
@@ -24,9 +25,6 @@ class Organization(models.Model):
        generation is retried (bounded by MAX_GENERATION_ATTEMPTS).
     3. The slug is never regenerated afterwards: renaming the organization
        does not change the slug, so external references remain stable.
-    4. Slug *format* is validated by ``full_clean()`` / admin forms only;
-       the ORM does not run validators, so code using ``objects.create()``
-       must pass a well-formed slug.
     """
 
     name = models.CharField("Organization name", max_length=NAME_MAX_LENGTH)
