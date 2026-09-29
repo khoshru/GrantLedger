@@ -1,6 +1,7 @@
 import re
 from typing import Any
 
+from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import IntegrityError, models, transaction
 from django.utils.text import slugify
@@ -34,7 +35,15 @@ class Organization(models.Model):
         unique=True,
         validators=[RegexValidator(regex=r"^[-a-zA-Z0-9_]+$")],
     )
+
     created_at = models.DateTimeField("Creation time", auto_now_add=True)
+
+    users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        through="OrganizationMembership",
+        related_name="organizations",
+        blank=True,
+    )
 
     class Meta:
         """Model metadata."""
@@ -80,3 +89,50 @@ class Organization(models.Model):
             except IntegrityError:
                 if attempts == MAX_GENERATION_ATTEMPTS:
                     raise
+
+
+class OrganizationMembership(models.Model):
+    """A user's role within an organization (the join table).
+
+    Roles are organization-level and are deliberately independent from
+    Django's ``is_staff`` and ``is_superuser`` flags.
+    """
+
+    class Role(models.TextChoices):
+        """Exactly three supported organization roles."""
+
+        MEMBER = "member", "Member"
+        APPROVER = "approver", "Approver"
+        ADMIN = "admin", "Admin"
+
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name="memberships",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="organization_memberships",
+    )
+    role = models.CharField(
+        "Role",
+        max_length=16,
+        choices=Role.choices,
+        default=Role.MEMBER,
+    )
+    created_at = models.DateTimeField("Creation time", auto_now_add=True)
+
+    class Meta:
+        """Model metadata with a database-level uniqueness guard."""
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "user"],
+                name="%(app_label)s_%(class)s_unique_user_per_organization",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        """Return a human-readable representation of the membership."""
+        return f"{self.user} — {self.get_role_display()} of {self.organization}"
