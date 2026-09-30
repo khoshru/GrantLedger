@@ -35,7 +35,15 @@ class TestOrganizationMembership:
         assert membership.role == OrganizationMembership.Role.MEMBER
 
     def test_each_role_saves(self) -> None:
-        """Every defined role can be persisted within one organization."""
+        """Every lowercase role value persists and round-trips on reload."""
+        assert list(OrganizationMembership.Role.values) == [
+            "member",
+            "approver",
+            "admin",
+        ]
+        assert all(
+            value == value.lower() for value in OrganizationMembership.Role.values
+        )
         org = Organization.objects.create(name="Redwood Trust")
         for index, role in enumerate(OrganizationMembership.Role):
             user = User.objects.create_user(
@@ -44,6 +52,8 @@ class TestOrganizationMembership:
             OrganizationMembership.objects.create(
                 organization=org, user=user, role=role
             )
+            membership = OrganizationMembership.objects.get(user=user)
+            assert membership.role == role
         assert org.memberships.count() == 3
         assert (
             org.memberships.filter(role=OrganizationMembership.Role.ADMIN).count() == 1
@@ -171,3 +181,5 @@ class TestOrganizationMembership:
         )
         membership = OrganizationMembership.objects.create(organization=org, user=user)
         assert membership.role == OrganizationMembership.Role.MEMBER
+
+    print(repr(OrganizationMembership.Role.values))
