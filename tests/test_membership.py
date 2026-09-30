@@ -134,7 +134,7 @@ class TestOrganizationMembership:
             membership.full_clean()
 
     def test_invalid_role_rejected_by_admin_form(self, admin_client: Client) -> None:
-        """The admin form rejects an invalid role without saving anything."""
+        """The admin form reports the error on the role field, saving nothing."""
         org = Organization.objects.create(name="Redwood Trust")
         user = User.objects.create_user(email="bad2@example.com", password="pw12345!")
         response = admin_client.post(
@@ -146,6 +146,8 @@ class TestOrganizationMembership:
             },
         )
         assert response.status_code == 200
+        form = response.context["adminform"].form
+        assert "role" in form.errors
         assert not OrganizationMembership.objects.exists()
 
     def test_admin_role_does_not_grant_django_flags(self) -> None:
