@@ -181,5 +181,3 @@ class TestOrganizationMembership:
         )
         membership = OrganizationMembership.objects.create(organization=org, user=user)
         assert membership.role == OrganizationMembership.Role.MEMBER
-
-    print(repr(OrganizationMembership.Role.values))
